@@ -1,3 +1,4 @@
+import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:cookbook/firestoreCRUD.dart';
 import 'package:flutter/material.dart';
 
@@ -154,7 +155,21 @@ class Repeat extends StatefulWidget {
 }
 
 class _RepeatState extends State<Repeat> {
-  bool isFavorite = false; // Tracks whether the recipe is favorited
+
+  final FirestoreService firestoreService = FirestoreService();
+
+  void showAlertDialog(
+      {required BuildContext context,
+        String? message,
+        AnimatedSnackBarType? asb}) {
+    AnimatedSnackBar.material(
+      message!,
+      type: asb!,
+    ).show(context);
+  }
+
+  bool isFavorite = false;
+  String docuId = "";
 
   @override
   Widget build(BuildContext context) {
@@ -192,19 +207,75 @@ class _RepeatState extends State<Repeat> {
                   ),
                 ),
               ),
-              GestureDetector(
-                // Makes the favorite icon clickable
-                onTap: () {
-                  setState(() {
-                    isFavorite = !isFavorite; // Toggles favorite state
 
-                  });
-                  print('${widget.name} favorite toggled: $isFavorite'); // Debugging message
+              IconButton(
+                onPressed: () async {
+                  if (isFavorite) {
+                    try {
+
+                      // We already have the docId stored from the previous add operation.
+                      if (docuId.isNotEmpty) {
+                        // Delete the document using the stored docId
+                        await firestoreService.deleteNote(docuId);
+
+                        // Update the state to reflect the removal of the recipe from favorites
+                        setState(() {
+                          isFavorite = false; // Mark as not favorite
+                          docuId = ""; // Clear the docId after deletion
+                        });
+
+                        showAlertDialog(
+                          context: context,
+                          message: 'Recipe deleted from favorites',
+                          asb: AnimatedSnackBarType.error,
+                        );
+                      } else {
+                        showAlertDialog(
+                          context: context,
+                          message: 'No matching document found for deletion',
+                          asb: AnimatedSnackBarType.error,
+                        );
+                      }
+                    } catch (e) {
+                      print('Error deleting recipe: $e');
+                      showAlertDialog(
+                        context: context,
+                        message: 'Error occurred while deleting',
+                        asb: AnimatedSnackBarType.error,
+                      );
+                    }
+                  } else {
+                    try {
+                      // Add the recipe to Firestore
+                      final docRef = await firestoreService.addNote(
+                        name: widget.name,
+                        image: widget.imagesStr,
+                      );
+
+                      // Store the document ID for future reference
+                      setState(() {
+                        isFavorite = true;
+                        docuId = docRef.id; // Save the docId when added
+                      });
+
+                      showAlertDialog(
+                        context: context,
+                        message: 'Recipe added to favorites',
+                        asb: AnimatedSnackBarType.success,
+                      );
+                    } catch (e) {
+                      print('Error adding recipe: $e');
+                      showAlertDialog(
+                        context: context,
+                        message: 'Error occurred while adding to favorites',
+                        asb: AnimatedSnackBarType.error,
+                      );
+                    }
+                  }
                 },
-                child: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border, // Dynamic icon
-                  size: 24, // Reduced icon size
-                  color: isFavorite ? Colors.red : Colors.white, // Color based on state
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.heart_broken,  // Switch icons based on isFavorite state
+                  color: isFavorite ? Colors.red : null,  // Red color for favorite
                 ),
               ),
             ],

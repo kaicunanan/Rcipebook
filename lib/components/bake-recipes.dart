@@ -190,35 +190,6 @@ class _RepeatState extends State<Repeat> {
   }
 
   bool isFavorite = false;
-
-  // Future<void> getAndDeleteDocumentId() async {
-  //   try {
-  //     QuerySnapshot snapshot = firestoreService.favorite.get();
-  //
-  //     firestoreService.getNotesStream();
-  //
-  //
-  //
-  //    firestoreService.deleteNote();
-  //   } catch (e) {
-  //     print("Error deleting document: $e");
-  //   }
-  // }
-  // Future<void> deleteDocumentByCriteria(String field, String value) async {
-  //   try {
-  //     final snapshot = await firestoreService.favorite.where(field, isEqualTo: value).get();
-  //     if (snapshot.docs.isNotEmpty) {
-  //       for (var doc in snapshot.docs) {
-  //         await firestoreService.deleteNote(doc.id);
-  //         print("Deleted document with ID: ${doc.id}");
-  //       }
-  //     } else {
-  //       print("No matching documents found.");
-  //     }
-  //   } catch (e) {
-  //     print("Error deleting document: ${e.toString()}");
-  //   }
-  // }
   String docuId = "";
   @override
   Widget build(BuildContext context) {
