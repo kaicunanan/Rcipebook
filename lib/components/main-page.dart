@@ -1,3 +1,4 @@
+import 'package:cookbook/components/authentication/auth-page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cookbook/components/bake-recipes.dart';
@@ -12,6 +13,7 @@ import 'package:cookbook/components/seafood-recipe.dart';
 import 'package:cookbook/components/smothie-recipe.dart';
 import 'package:cookbook/components/soup-recipe.dart';
 import 'package:cookbook/components/vegies-recipe.dart';
+import '../favorite.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -35,7 +37,7 @@ class _RecipesPageState extends State<RecipesPage> {
   final user = FirebaseAuth.instance.currentUser!;
   Future<void>logoutFunction()async{
     FirebaseAuth.instance.signOut();
-
+  // Navigator.pushReplacement(context, MaterialPageRoute(builder:(context) => const AuthPage(),));
   }
   @override
   Widget build(BuildContext context) {
@@ -69,6 +71,7 @@ class _RecipesPageState extends State<RecipesPage> {
           ),
         ],
       ),
+
       drawer: Drawer(
         child: Container(
           color: Color(0xFFE1C4B3), // Background color for the menu body
@@ -100,15 +103,19 @@ class _RecipesPageState extends State<RecipesPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.favorite, color: Colors.pink), // Pink icon
+                leading: Icon(Icons.favorite, color: Colors.pink),
                 title: const Text(
                   'FAVORITE',
-                  style: TextStyle(color: Colors.white), // White text
+                  style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer when tapped
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const FavoritePage()),
+                  );
                 },
               ),
+
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.green,),
                 title: const Text("Logout"),

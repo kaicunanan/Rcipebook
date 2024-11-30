@@ -1,4 +1,7 @@
+import 'package:animated_snack_bar/animated_snack_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cookbook/firestoreCRUD.dart';
 
 // Main StatefulWidget for the Bake Recipes screen
 class MyBake extends StatefulWidget {
@@ -11,16 +14,34 @@ class MyBake extends StatefulWidget {
 class _MyBakeState extends State<MyBake> {
   // List of recipes with image paths and names
   final List<Map<String, String>> recipes = [
-    {'image': 'bake/baked-tomatoes-cheese.jpg', 'name': "Baked Tomatoes Cheese"},
+    {
+      'image': 'bake/baked-tomatoes-cheese.jpg',
+      'name': "Baked Tomatoes Cheese"
+    },
     {'image': 'bake/cheeseburger-sliders.jpg', 'name': "Cheeseburger Sliders"},
     {'image': 'bake/chili-mac-casserole.jpg', 'name': "Chili Mac Casserole"},
     {'image': 'bake/CORNBREAD-TACO-BAKE.jpg', 'name': "CORNBREAD TACO BAKE"},
-    {'image': 'bake/dump and bake raviolo casserole.jpg', 'name': "Dump and Bake \nRaviolo Casserole"},
-    {'image': 'bake/easy mexican beeg mince bake.jpg', 'name': "Easy Mexican Beef \nMince Bake"},
-    {'image': 'bake/enchilada casserole recipe.jpg', 'name': "Enchilada Casserole Recipe"},
-    {'image': 'bake/fold over tortilla bake.jpg', 'name': "Fold Over \nTortilla Bake"},
+    {
+      'image': 'bake/dump and bake raviolo casserole.jpg',
+      'name': "Dump and Bake \nRaviolo Casserole"
+    },
+    {
+      'image': 'bake/easy mexican beeg mince bake.jpg',
+      'name': "Easy Mexican Beef \nMince Bake"
+    },
+    {
+      'image': 'bake/enchilada casserole recipe.jpg',
+      'name': "Enchilada Casserole Recipe"
+    },
+    {
+      'image': 'bake/fold over tortilla bake.jpg',
+      'name': "Fold Over \nTortilla Bake"
+    },
     {'image': 'bake/Lasagna-Casserole.jpg', 'name': "Lasagna Casserole"},
-    {'image': 'bake/Sweet-Potato-Pasta-Bake.jpg', 'name': "Sweet Potato \nPasta Bake"},
+    {
+      'image': 'bake/Sweet-Potato-Pasta-Bake.jpg',
+      'name': "Sweet Potato \nPasta Bake"
+    },
   ];
 
   @override
@@ -28,7 +49,8 @@ class _MyBakeState extends State<MyBake> {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // Disables the debug banner
       home: Scaffold(
-        backgroundColor: const Color(0xFFE1C4B3), // Sets the background color of the screen
+        backgroundColor:
+            const Color(0xFFE1C4B3), // Sets the background color of the screen
         appBar: AppBar(
           title: const Text(
             "BAKE RECIPES",
@@ -39,11 +61,13 @@ class _MyBakeState extends State<MyBake> {
               fontSize: 20,
             ),
           ),
-          backgroundColor: const Color(0xFFCD8868), // Sets AppBar background color
+          backgroundColor:
+              const Color(0xFFCD8868), // Sets AppBar background color
           iconTheme: const IconThemeData(
             color: Colors.white, // Sets the color for AppBar icons
           ),
-          leading: IconButton( // Custom back button
+          leading: IconButton(
+            // Custom back button
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.pop(context); // Navigates back to the previous screen
@@ -85,7 +109,8 @@ class _MyBakeState extends State<MyBake> {
                   ),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.home, color: Colors.white), // Home icon
+                  leading:
+                      const Icon(Icons.home, color: Colors.white), // Home icon
                   title: const Text(
                     'HOME',
                     style: TextStyle(color: Colors.white),
@@ -95,7 +120,8 @@ class _MyBakeState extends State<MyBake> {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.favorite, color: Colors.pink), // Favorite icon
+                  leading:
+                      Icon(Icons.favorite, color: Colors.pink), // Favorite icon
                   title: const Text(
                     'FAVORITE',
                     style: TextStyle(color: Colors.white),
@@ -151,7 +177,34 @@ class Repeat extends StatefulWidget {
 }
 
 class _RepeatState extends State<Repeat> {
-  bool isFavorite = false; // Tracks whether the recipe is favorited
+  final FirestoreService firestoreService = FirestoreService();
+
+  void showAlertDialog(
+      {required BuildContext context,
+      String? message,
+      AnimatedSnackBarType? asb}) {
+    AnimatedSnackBar.material(
+      message!,
+      type: asb!,
+    ).show(context);
+  }
+
+  bool isFavorite = false;
+
+  Future<void> getAndDeleteDocumentId() async {
+    try {
+      QuerySnapshot snapshot = firestoreService.favorite.get();
+
+      firestoreService.getNotesStream();
+
+
+
+     firestoreService.deleteNote();
+    } catch (e) {
+      print("Error deleting document: $e");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +217,8 @@ class _RepeatState extends State<Repeat> {
       child: Column(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(8.0), // Rounds the image corners
+            borderRadius:
+                BorderRadius.circular(8.0), // Rounds the image corners
             child: Image.asset(
               widget.imagesStr, // Displays the recipe image
               width: 150.0,
@@ -174,7 +228,8 @@ class _RepeatState extends State<Repeat> {
           ),
           const SizedBox(height: 8), // Spacer between image and text
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Spacing between text and favorite icon
+            mainAxisAlignment: MainAxisAlignment
+                .spaceBetween, // Spacing between text and favorite icon
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
@@ -188,17 +243,30 @@ class _RepeatState extends State<Repeat> {
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () {
+              IconButton(
+                onPressed: () {
                   setState(() {
-                    isFavorite = !isFavorite; // Toggles the favorite state
+                    if (isFavorite) {
+                      isFavorite = false;
+                      getAndDeleteDocumentId();
+                      showAlertDialog(
+                          context: context,
+                          message: 'Already deleted',
+                          asb: AnimatedSnackBarType.error);
+                    } else {
+                      isFavorite = true;
+                      firestoreService.addNote(
+                          name: widget.name, image: widget.imagesStr);
+                      showAlertDialog(
+                          context: context,
+                          message: 'Already added',
+                          asb: AnimatedSnackBarType.success);
+                    }
                   });
-                  print('${widget.name} favorite toggled: $isFavorite'); // Debug log
                 },
-                child: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border, // Changes icon based on favorite state
-                  size: 24,
-                  color: isFavorite ? Colors.red : Colors.white, // Updates color dynamically
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.heart_broken,
+                  color: isFavorite ? Colors.red : null,
                 ),
               ),
             ],

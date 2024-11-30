@@ -1,4 +1,7 @@
+import 'package:cookbook/firestoreCRUD.dart';
 import 'package:flutter/material.dart';
+
+
 
 class MyChicken extends StatefulWidget {
   const MyChicken({super.key});
@@ -24,6 +27,8 @@ class _MyChickenState extends State<MyChicken> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -192,6 +197,7 @@ class _RepeatState extends State<Repeat> {
                 onTap: () {
                   setState(() {
                     isFavorite = !isFavorite; // Toggles favorite state
+
                   });
                   print('${widget.name} favorite toggled: $isFavorite'); // Debugging message
                 },
