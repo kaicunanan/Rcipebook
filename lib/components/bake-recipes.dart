@@ -191,21 +191,35 @@ class _RepeatState extends State<Repeat> {
 
   bool isFavorite = false;
 
-  Future<void> getAndDeleteDocumentId() async {
-    try {
-      QuerySnapshot snapshot = firestoreService.favorite.get();
-
-      firestoreService.getNotesStream();
-
-
-
-     firestoreService.deleteNote();
-    } catch (e) {
-      print("Error deleting document: $e");
-    }
-  }
-
-
+  // Future<void> getAndDeleteDocumentId() async {
+  //   try {
+  //     QuerySnapshot snapshot = firestoreService.favorite.get();
+  //
+  //     firestoreService.getNotesStream();
+  //
+  //
+  //
+  //    firestoreService.deleteNote();
+  //   } catch (e) {
+  //     print("Error deleting document: $e");
+  //   }
+  // }
+  // Future<void> deleteDocumentByCriteria(String field, String value) async {
+  //   try {
+  //     final snapshot = await firestoreService.favorite.where(field, isEqualTo: value).get();
+  //     if (snapshot.docs.isNotEmpty) {
+  //       for (var doc in snapshot.docs) {
+  //         await firestoreService.deleteNote(doc.id);
+  //         print("Deleted document with ID: ${doc.id}");
+  //       }
+  //     } else {
+  //       print("No matching documents found.");
+  //     }
+  //   } catch (e) {
+  //     print("Error deleting document: ${e.toString()}");
+  //   }
+  // }
+  String docuId = "";
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -244,31 +258,79 @@ class _RepeatState extends State<Repeat> {
                 ),
               ),
               IconButton(
-                onPressed: () {
-                  setState(() {
-                    if (isFavorite) {
-                      isFavorite = false;
-                      getAndDeleteDocumentId();
-                      showAlertDialog(
+                onPressed: () async {
+                  if (isFavorite) {
+                    try {
+
+                      // We already have the docId stored from the previous add operation.
+                      if (docuId.isNotEmpty) {
+                        // Delete the document using the stored docId
+                        await firestoreService.deleteNote(docuId);
+
+                        // Update the state to reflect the removal of the recipe from favorites
+                        setState(() {
+                          isFavorite = false; // Mark as not favorite
+                          docuId = ""; // Clear the docId after deletion
+                        });
+
+                        showAlertDialog(
                           context: context,
-                          message: 'Already deleted',
-                          asb: AnimatedSnackBarType.error);
-                    } else {
-                      isFavorite = true;
-                      firestoreService.addNote(
-                          name: widget.name, image: widget.imagesStr);
-                      showAlertDialog(
+                          message: 'Recipe deleted from favorites',
+                          asb: AnimatedSnackBarType.error,
+                        );
+                      } else {
+                        showAlertDialog(
                           context: context,
-                          message: 'Already added',
-                          asb: AnimatedSnackBarType.success);
+                          message: 'No matching document found for deletion',
+                          asb: AnimatedSnackBarType.error,
+                        );
+                      }
+                    } catch (e) {
+                      print('Error deleting recipe: $e');
+                      showAlertDialog(
+                        context: context,
+                        message: 'Error occurred while deleting',
+                        asb: AnimatedSnackBarType.error,
+                      );
                     }
-                  });
+                  } else {
+                    try {
+                      // Add the recipe to Firestore
+                      final docRef = await firestoreService.addNote(
+                        name: widget.name,
+                        image: widget.imagesStr,
+                      );
+
+                      // Store the document ID for future reference
+                      setState(() {
+                        isFavorite = true;
+                        docuId = docRef.id; // Save the docId when added
+                      });
+
+                      showAlertDialog(
+                        context: context,
+                        message: 'Recipe added to favorites',
+                        asb: AnimatedSnackBarType.success,
+                      );
+                    } catch (e) {
+                      print('Error adding recipe: $e');
+                      showAlertDialog(
+                        context: context,
+                        message: 'Error occurred while adding to favorites',
+                        asb: AnimatedSnackBarType.error,
+                      );
+                    }
+                  }
                 },
                 icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.heart_broken,
-                  color: isFavorite ? Colors.red : null,
+                  isFavorite ? Icons.favorite : Icons.heart_broken,  // Switch icons based on isFavorite state
+                  color: isFavorite ? Colors.red : null,  // Red color for favorite
                 ),
               ),
+
+
+
+
             ],
           ),
         ],
